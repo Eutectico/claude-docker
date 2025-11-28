@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  # Claude Code CLI Container
+  claude-cli:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: claude-code-cli
+    stdin_open: true
+    tty: true
+    volumes:
+      # Persistente Claude Auth und Config
+      - claude_config:/root/.config
+      - claude_cache:/root/.cache
+      # Projekt-Verzeichnis (optional)
+      - ./workspace:/workspace
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+    working_dir: /workspace
+    command: /bin/bash
+    restart: unless-stopped
+
+volumes:
+  claude_config:
+    driver: local
+  claude_cache:
+    driver: local

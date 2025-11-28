@@ -1,0 +1,15 @@
+# Environment
+.env
+
+# Workspace
+workspace/
+
+# Docker volumes data
+*_data/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+Thumbs.db
