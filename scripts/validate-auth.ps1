@@ -10,13 +10,21 @@ if (-not (Test-Path ".env")) {
 # Parse .env file
 $envVars = @{}
 Get-Content ".env" | ForEach-Object {
-    if ($_ -match '^([^#][^=]+)=(.*)$') {
-        $envVars[$matches[1].Trim()] = $matches[2].Trim()
+    # Remove carriage returns and trim
+    $line = $_.Trim() -replace "`r", ""
+    if ($line -match '^([^#][^=]+)=(.*)$') {
+        $key = $matches[1].Trim()
+        $value = $matches[2].Trim()
+        $envVars[$key] = $value
     }
 }
 
-# Standard auf api_key wenn nicht gesetzt
-$AUTH_METHOD = if ($envVars['AUTH_METHOD']) { $envVars['AUTH_METHOD'] } else { 'api_key' }
+# Standard auf api_key wenn nicht gesetzt, und trimme alle Whitespace
+$AUTH_METHOD = if ($envVars['AUTH_METHOD']) {
+    $envVars['AUTH_METHOD'].Trim() -replace '\s', ''
+} else {
+    'api_key'
+}
 
 Write-Host "🔐 Prüfe Authentifizierungsmethode: $AUTH_METHOD" -ForegroundColor Cyan
 Write-Host ""

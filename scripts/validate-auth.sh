@@ -11,15 +11,17 @@ NC='\033[0m' # No Color
 
 # .env Datei laden
 if [ -f ".env" ]; then
-    # Exportiere Variablen aus .env
-    export $(grep -v '^#' .env | grep -v '^$' | xargs)
+    # Exportiere Variablen aus .env (ohne Kommentare und leere Zeilen)
+    set -a
+    source <(grep -v '^#' .env | grep -v '^$' | sed 's/\r$//')
+    set +a
 else
     echo -e "${RED}❌ .env Datei nicht gefunden!${NC}"
     exit 1
 fi
 
-# Standard auf api_key wenn nicht gesetzt
-AUTH_METHOD=${AUTH_METHOD:-api_key}
+# Standard auf api_key wenn nicht gesetzt, und trimme Whitespace
+AUTH_METHOD=$(echo "${AUTH_METHOD:-api_key}" | tr -d '[:space:]')
 
 echo -e "${BLUE}🔐 Prüfe Authentifizierungsmethode: ${AUTH_METHOD}${NC}"
 echo ""
