@@ -16,7 +16,27 @@ services:
       # Projekt-Verzeichnis (optional)
       - ./workspace:/workspace
     environment:
+      # Authentication Method
+      - AUTH_METHOD=${AUTH_METHOD:-api_key}
+
+      # Anthropic API Key (Method 1)
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+
+      # AWS Bedrock (Method 3)
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      - AWS_PROFILE=${AWS_PROFILE:-default}
+
+      # Google Vertex AI (Method 4)
+      - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS}
+      - GOOGLE_CLOUD_PROJECT=${GOOGLE_CLOUD_PROJECT}
+      - GOOGLE_CLOUD_REGION=${GOOGLE_CLOUD_REGION:-us-central1}
+
+      # Advanced Options
+      - CLAUDE_CODE_API_KEY_HELPER=${CLAUDE_CODE_API_KEY_HELPER}
+      - CLAUDE_CODE_API_KEY_HELPER_TTL_MS=${CLAUDE_CODE_API_KEY_HELPER_TTL_MS:-300000}
     working_dir: /workspace
     command: /bin/bash
     restart: unless-stopped

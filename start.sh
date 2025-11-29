@@ -33,11 +33,34 @@ if [ ! -f ".env" ]; then
     echo "⚠️  .env Datei nicht gefunden. Erstelle aus .env.example..."
     cp .env.example .env
     echo ""
-    echo "⚠️  WICHTIG: Bitte tragen Sie Ihren Anthropic API Key in .env ein!"
-    echo "   Bearbeiten Sie .env und setzen Sie ANTHROPIC_API_KEY=your-key-here"
-    echo "   API Key erhalten Sie unter: https://console.anthropic.com/settings/keys"
+    echo "⚠️  WICHTIG: Bitte konfigurieren Sie Ihre Authentifizierungsmethode in .env!"
     echo ""
-    read -p "Drücken Sie Enter wenn Sie den API Key eingetragen haben..."
+    echo "📋 Verfügbare Methoden:"
+    echo "  1. api_key      - Anthropic API Key (Standard)"
+    echo "  2. interactive  - Interactive OAuth Login mit Claude.ai Account"
+    echo "  3. bedrock      - AWS Bedrock mit IAM/OIDC"
+    echo "  4. vertex       - Google Vertex AI"
+    echo ""
+    echo "Bearbeiten Sie .env und:"
+    echo "  1. Setzen Sie AUTH_METHOD auf eine der obigen Optionen"
+    echo "  2. Konfigurieren Sie die entsprechenden Credentials"
+    echo ""
+    echo "Beispiel für API Key:"
+    echo "  AUTH_METHOD=api_key"
+    echo "  ANTHROPIC_API_KEY=sk-ant-your-key-here"
+    echo ""
+    read -p "Drücken Sie Enter wenn Sie die Konfiguration abgeschlossen haben..."
+fi
+
+# Validiere Authentifizierung
+if [ -f "scripts/validate-auth.sh" ]; then
+    echo ""
+    if ! bash scripts/validate-auth.sh; then
+        echo ""
+        echo "❌ Authentifizierungsvalidierung fehlgeschlagen!"
+        echo "Bitte korrigieren Sie die Konfiguration in .env und versuchen Sie es erneut."
+        exit 1
+    fi
 fi
 
 # Baue und starte Container

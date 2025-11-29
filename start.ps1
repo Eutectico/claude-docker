@@ -35,11 +35,40 @@ if (-not (Test-Path ".env")) {
     Write-Host "⚠️  .env Datei nicht gefunden. Erstelle aus .env.example..." -ForegroundColor Yellow
     Copy-Item ".env.example" ".env"
     Write-Host ""
-    Write-Host "⚠️  WICHTIG: Bitte tragen Sie Ihren Anthropic API Key in .env ein!" -ForegroundColor Yellow
-    Write-Host "   Bearbeiten Sie .env und setzen Sie ANTHROPIC_API_KEY=your-key-here" -ForegroundColor White
-    Write-Host "   API Key erhalten Sie unter: https://console.anthropic.com/settings/keys" -ForegroundColor White
+    Write-Host "⚠️  WICHTIG: Bitte konfigurieren Sie Ihre Authentifizierungsmethode in .env!" -ForegroundColor Yellow
     Write-Host ""
-    Read-Host "Drücken Sie Enter wenn Sie den API Key eingetragen haben"
+    Write-Host "📋 Verfügbare Methoden:" -ForegroundColor Cyan
+    Write-Host "  1. api_key      - Anthropic API Key (Standard)" -ForegroundColor White
+    Write-Host "  2. interactive  - Interactive OAuth Login mit Claude.ai Account" -ForegroundColor White
+    Write-Host "  3. bedrock      - AWS Bedrock mit IAM/OIDC" -ForegroundColor White
+    Write-Host "  4. vertex       - Google Vertex AI" -ForegroundColor White
+    Write-Host ""
+    Write-Host "Bearbeiten Sie .env und:" -ForegroundColor White
+    Write-Host "  1. Setzen Sie AUTH_METHOD auf eine der obigen Optionen" -ForegroundColor Gray
+    Write-Host "  2. Konfigurieren Sie die entsprechenden Credentials" -ForegroundColor Gray
+    Write-Host ""
+    Write-Host "Beispiel für API Key:" -ForegroundColor Yellow
+    Write-Host "  AUTH_METHOD=api_key" -ForegroundColor Gray
+    Write-Host "  ANTHROPIC_API_KEY=sk-ant-your-key-here" -ForegroundColor Gray
+    Write-Host ""
+    Read-Host "Drücken Sie Enter wenn Sie die Konfiguration abgeschlossen haben"
+}
+
+# Validiere Authentifizierung
+if (Test-Path "scripts\validate-auth.ps1") {
+    Write-Host ""
+    try {
+        & ".\scripts\validate-auth.ps1"
+        if ($LASTEXITCODE -ne 0) {
+            Write-Host ""
+            Write-Host "❌ Authentifizierungsvalidierung fehlgeschlagen!" -ForegroundColor Red
+            Write-Host "Bitte korrigieren Sie die Konfiguration in .env und versuchen Sie es erneut." -ForegroundColor Yellow
+            exit 1
+        }
+    } catch {
+        Write-Host "❌ Fehler bei der Authentifizierungsvalidierung: $_" -ForegroundColor Red
+        exit 1
+    }
 }
 
 # Baue und starte Container
