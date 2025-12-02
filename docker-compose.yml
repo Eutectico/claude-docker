@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # Claude Code CLI Container
   claude-cli:
@@ -9,10 +7,11 @@ services:
     container_name: claude-code-cli
     stdin_open: true
     tty: true
+    user: "1001:1001"
     volumes:
       # Persistente Claude Auth und Config
-      - claude_config:/root/.config
-      - claude_cache:/root/.cache
+      - claude_config:/home/claudeuser/.config
+      - claude_cache:/home/claudeuser/.cache
       # Projekt-Verzeichnis (optional)
       - ./workspace:/workspace
     environment:

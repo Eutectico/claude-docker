@@ -21,13 +21,14 @@ The container (defined in `Dockerfile`) includes:
 - Node.js v22 with npm v10+
 - Claude Code CLI (`@anthropic-ai/claude-code`)
 - Basic Unix utilities (git, vim, nano, curl, wget, bash-completion)
+- Non-root user `claudeuser` (UID=1001, GID=1001) for security
 - Bash aliases: `cc` and `claude-code` both aliased to `claude`
 - Working directory: `/workspace`
 
 ### Volume Mounts
 
-1. `claude_config:/root/.config` - Persists Claude Code configuration and authentication
-2. `claude_cache:/root/.cache` - Cache for better performance
+1. `claude_config:/home/claudeuser/.config` - Persists Claude Code configuration and authentication
+2. `claude_cache:/home/claudeuser/.cache` - Cache for better performance
 3. `./workspace:/workspace` - Shared directory for code/files between host and container
 
 ## Common Commands
@@ -224,12 +225,28 @@ The `.env` file (created from `.env.example` on first run) supports multiple aut
 - `CLAUDE_CODE_API_KEY_HELPER`: Path to custom script for dynamic API key generation
 - `CLAUDE_CODE_API_KEY_HELPER_TTL_MS`: Key helper refresh interval (default: 300000ms = 5 minutes)
 
+## Security
+
+### Non-Root User
+
+The container runs as a non-root user `claudeuser` with UID=1001 and GID=1001 for improved security:
+- All processes run with limited privileges
+- Configuration and cache files are stored in `/home/claudeuser/`
+- The workspace directory `/workspace` is accessible with proper permissions
+- This follows Docker security best practices by avoiding unnecessary root privileges
+
+**Important for file permissions:**
+- Files created inside the container in `/workspace` will be owned by UID=1001 on the host
+- If your host user has a different UID, you may need to adjust permissions accordingly
+- To match the container user with your host user, you can modify the UID/GID in the Dockerfile
+
 ## Platform-Specific Notes
 
 ### Linux/macOS
 
 - Scripts must be executable: `chmod +x *.sh`
 - User should be in `docker` group to avoid needing `sudo`: `sudo usermod -aG docker $USER`
+- For seamless file permissions, ensure your host user UID matches the container UID (1001)
 - The `check-setup.sh` script validates the entire Docker environment and checks:
   - Docker installation and status
   - Docker Compose availability

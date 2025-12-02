@@ -39,18 +39,30 @@ RUN npm install -g @anthropic-ai/claude-code
 # Verify installation
 RUN claude --version || echo "Claude Code installed, awaiting authentication"
 
-# Setup bash aliases for convenience
-RUN echo 'alias cc="claude"' >> /root/.bashrc && \
-    echo 'alias claude-code="claude"' >> /root/.bashrc
+# Create non-root user with UID=1001 and GID=1001
+RUN groupadd -g 1001 claudeuser && \
+    useradd -u 1001 -g 1001 -m -s /bin/bash claudeuser
 
-# Create workspace directory
+# Setup bash aliases and welcome message for claudeuser
+RUN echo 'alias cc="claude"' >> /home/claudeuser/.bashrc && \
+    echo 'alias claude-code="claude"' >> /home/claudeuser/.bashrc && \
+    echo 'echo "🤖 Claude Code CLI Container"' >> /home/claudeuser/.bashrc && \
+    echo 'echo "Run: claude"' >> /home/claudeuser/.bashrc && \
+    echo 'echo "Workspace: /workspace"' >> /home/claudeuser/.bashrc && \
+    echo 'echo ""' >> /home/claudeuser/.bashrc
+
+# Create workspace directory and set permissions
+RUN mkdir -p /workspace && chown -R 1001:1001 /workspace
+
+# Create config and cache directories with correct permissions
+RUN mkdir -p /home/claudeuser/.config /home/claudeuser/.cache && \
+    chown -R 1001:1001 /home/claudeuser/.config /home/claudeuser/.cache
+
+# Switch to non-root user
+USER claudeuser
+
+# Set working directory
 WORKDIR /workspace
-
-# Welcome message
-RUN echo 'echo "🤖 Claude Code CLI Container"' >> /root/.bashrc && \
-    echo 'echo "Run: claude"' >> /root/.bashrc && \
-    echo 'echo "Workspace: /workspace"' >> /root/.bashrc && \
-    echo 'echo ""' >> /root/.bashrc
 
 # Default command
 CMD ["/bin/bash"]
