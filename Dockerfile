@@ -16,6 +16,7 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-pip \
     unzip \
+    sudo \
     && rm -rf /var/lib/apt/lists/*
 
 # Install AWS CLI v2 (für Bedrock)
@@ -42,6 +43,10 @@ RUN claude --version || echo "Claude Code installed, awaiting authentication"
 # Create non-root user with UID=1001 and GID=1001
 RUN groupadd -g 1001 claudeuser && \
     useradd -u 1001 -g 1001 -m -s /bin/bash claudeuser
+
+# Configure sudo for claudeuser (passwordless)
+RUN usermod -aG sudo claudeuser && \
+    echo 'claudeuser ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
 
 # Setup bash aliases and welcome message for claudeuser
 RUN echo 'alias cc="claude"' >> /home/claudeuser/.bashrc && \
